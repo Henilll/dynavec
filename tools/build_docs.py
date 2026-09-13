@@ -836,27 +836,31 @@ caching backends, framework adapters, and one-shot provisioning.</p>
 
 
 PAGES["dashboard"] = ("Telemetry dashboard",
-    "A Langfuse-style observability UI for live query traces, latency, and cache performance.",
+    "A native, in-your-brand observability dashboard — a Langfuse-style view of real query telemetry.",
     """
-<p>Enable telemetry on your client, serve it over a small JSON API, and point the dashboard app at it:</p>
-""" + code("""your app ──▶ Dynavec(..., telemetry=recorder)      # records real events (Python)
-                     │
-                     ▼
-        dynavec.dashboard.serve(recorder)           # JSON API  (Python, stdlib)
-          GET /api/metrics · /api/traces · /api/trace/{id}
-                     │  (fetch)
-                     ▼
-        dashboard/  (Next.js + Tailwind + Recharts) # frontend app (TypeScript)""") + """
-<h2>Run it</h2>
-""" + code("""# 1) produce real telemetry + serve the API (no AWS needed)
-python examples/dashboard_demo.py            # API on http://127.0.0.1:8779
+<p>Attach a recorder to your client and every search is captured with latency, cache outcome,
+result count, and score stats. No simulated data.</p>
+<div class="callout">Live interactive preview: <a href="https://codeforstartups.github.io/dynavec/dashboard/" target="_blank" rel="noopener">codeforstartups.github.io/dynavec/dashboard</a> (landing-page theme).</div>
+<h2>1. Expose real telemetry</h2>
+<p>Attach a recorder to your client and serve the API:</p>
+""" + code("""from dynavec import Dynavec, DynavecConfig, SemanticCache
+from dynavec.telemetry import TelemetryRecorder
+from dynavec.dashboard import serve
 
-# 2) run the dashboard against it
-cd dashboard
+rec = TelemetryRecorder()
+db = Dynavec(cfg, embedder=emb, cache=SemanticCache(), telemetry=rec)
+# ... your app runs searches; the recorder fills automatically ...
+serve(rec, port=8779)          # JSON API at http://127.0.0.1:8779""") + """
+<h2>2. Run the dashboard</h2>
+<p>Points at that API; falls back to sample data if unset:</p>
+""" + code("""cd dashboard
 npm install
 NEXT_PUBLIC_DYNAVEC_API=http://127.0.0.1:8779 npm run dev   # http://localhost:3000""") + """
-<p>With no API configured, the dashboard falls back to sample data, so <code>npm run dev</code> works standalone.</p>
+<p>No AWS? <code>python examples/dashboard_demo.py</code> runs real searches against in-memory
+stand-ins and serves the API on <code>:8779</code> for the dashboard to read.</p>
 <h2>Tracing view</h2>
+<p>Shows a query-volume histogram, latency percentiles (p50/p95/p99), cache hit-rate, and a
+filterable traces table with per-trace drill-down:</p>
 <table class="doc__params">
 <tr><th>Panel</th><th>Shows</th></tr>
 <tr><td>KPI cards</td><td>Queries/min, p95 latency, cache hit rate, average results, error rate</td></tr>
@@ -866,8 +870,9 @@ NEXT_PUBLIC_DYNAVEC_API=http://127.0.0.1:8779 npm run dev   # http://localhost:3
 </table>
 <img src="../images/dashboard_tracing.png" alt="Tracing view" class="doc__img" />
 <p>Click any row to open a detail drawer with per-call similarity scores, filter state, and error details.</p>
+<p>Contributors welcome: the Evaluation (recall@k, faithfulness), Resource (buckets/indexes/namespaces),
+and Cost panels are open under the <a href="https://github.com/codeforstartups/dynavec/issues/122">dashboard epic (#122)</a>.</p>
 """)
-
 def render(slug: str) -> str:
     title, sub, body = PAGES[slug]
     # sidebar
