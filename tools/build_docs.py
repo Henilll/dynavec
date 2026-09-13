@@ -870,8 +870,6 @@ filterable traces table with per-trace drill-down:</p>
 </table>
 <img src="../images/dashboard_tracing.png" alt="Tracing view" class="doc__img" />
 <p>Click any row to open a detail drawer with per-call similarity scores, filter state, and error details.</p>
-<p>Contributors welcome: the Evaluation (recall@k, faithfulness), Resource (buckets/indexes/namespaces),
-and Cost panels are open under the <a href="https://github.com/codeforstartups/dynavec/issues/122">dashboard epic (#122)</a>.</p>
 """)
 def render(slug: str) -> str:
     title, sub, body = PAGES[slug]
